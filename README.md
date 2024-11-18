@@ -13,7 +13,7 @@ Welcome to the **Full-Stack FastAPI and React Template** repository! This projec
 As part of this challenge, your primary goal is to:
 
 1. Dockerize a full-stack application with a FastAPI backend and React frontend.
-2. Configure and deploy monitoring and logging tools.
+2. Configure and deploy monitoring and logging tools including Prometheus, Grafana, Loki, Promtail, and cAdvisor.
 3. Set up a reverse proxy for application routing.
 4. Deploy the application to a cloud platform with proper domain configuration.
 5. Submit a working repository with detailed documentation and screenshots of your deployed application.
@@ -22,61 +22,75 @@ As part of this challenge, your primary goal is to:
 
 ## Challenge Requirements
 
-1. **Dockerization**:  
-   - Write `Dockerfile`s to containerize both the **React frontend** and **FastAPI backend**.  
-   - Ensure each service can be built and run locally in their respective containers.  
-   - Use a `docker-compose.yml` file to orchestrate all services, including the database, monitoring, and logging tools.
+1. **Dockerization and Orchestration**:  
+   - Write `Dockerfile`s to containerize both the **React frontend** and **FastAPI backend**.
+   - Create two `docker-compose.yml` files:
+     1. **Application Stack Compose**:  
+        Orchestrate the following services:
+        - React frontend.
+        - FastAPI backend.
+        - PostgreSQL database.
+        - Adminer (for database management).
+        - Reverse Proxy (Traefik or Nginx Proxy Manager).
+     2. **Monitoring Stack Compose**:  
+        Orchestrate the following services:
+        - Prometheus.
+        - Grafana.
+        - Loki and Promtail.
+        - **cAdvisor** for monitoring container performance.
+     - Ensure both Docker Compose files are connected to a common Docker network to allow inter-container communication.
 
 2. **Reverse Proxy Configuration**:  
-   Configure **Traefik** or **Nginx Proxy Manager** to:  
-   - Serve the frontend and backend on the same host machine port (80).  
-   - Serve the **frontend** on the root path (`/`).  
-   - Proxy `/api` on the backend to `/api` on the main domain.  
-   - Proxy `/docs` on the backend to `/docs` on the main domain.  
+   Use **Traefik** or **Nginx Proxy Manager** in the **Application Stack Compose** to:
+   - Serve the **frontend** on `/` (the root path).
+   - Proxy `/api` to the FastAPI backend.
+   - Proxy `/docs` to the FastAPI backend's Swagger documentation.
+   - Proxy `/prometheus` to the Prometheus web UI (via the Monitoring Stack).
+   - Proxy `/grafana` to the Grafana web UI (via the Monitoring Stack).
+   - Ensure all routes are properly secured and accessible.
 
 3. **Database Configuration**:  
-   - Use PostgreSQL as the database for the FastAPI backend.  
-   - Ensure the database is properly set up and connected in the `docker-compose.yml`.  
-   - Test database connectivity and functionality by running a sample API request.  
+   - Use PostgreSQL as the backend database.
+   - Configure Adminer for database management and ensure it is accessible via `db.domain`.
 
-4. **Adminer Setup**:  
-   - Add **Adminer** to the `docker-compose.yml` to manage the PostgreSQL database.  
-   - Expose Adminer on port `8080` and configure it to be accessible via `db.domain`.  
+4. **Monitoring and Logging**:  
+   - Set up the following tools using the **Monitoring Stack Compose**:
+     - **Prometheus** for collecting application metrics.
+     - **Grafana** for visualizing metrics and logs.
+     - **Loki** and **Promtail** for log aggregation and forwarding.
+     - **cAdvisor** to monitor container metrics and performance.
+   - Ensure Prometheus is scraping metrics from the backend, and Grafana is configured with dashboards for logs and metrics.
+   - Ensure that all monitoring dashboards (Prometheus, Grafana, and cAdvisor) are routed through the reverse proxy (Traefik or Nginx Proxy Manager) in the **Application Stack Compose**.
+   - Create a cAdvisor Dashboard in Grafana**:
+     - Integrate **cAdvisor** with **Grafana** to display container performance metrics such as CPU usage, memory usage, disk I/O, and network I/O.
+     - Create a custom Grafana dashboard that visualizes container metrics from cAdvisor.
+     - Ensure the dashboard has proper panels for the most important container metrics.
 
-5. **Proxy Manager Setup**:  
-   - Add **Nginx Proxy Manager** or **Traefik** to the `docker-compose.yml` for managing proxy configurations.  
-   - Expose the proxy manager on port `8090` and make it accessible via `proxy.domain`.  
+   - Add Loki as a Data Source in Grafana**:
+     - Integrate **Loki** into **Grafana** to enable log aggregation and visualization.
+     - Ensure that **Loki** is set up as a data source in **Grafana** and logs from the application and containers are sent to it.
+     - Include a panel in Grafana that visualizes logs from Loki, which could be useful for troubleshooting or monitoring application performance.
 
-6. **Monitoring and Logging Tools**:  
-   - Deploy **Prometheus**, **Grafana**, **Loki**, and **Promtail** using `docker-compose.yml`.  
-   - Configure:  
-     - Prometheus to scrape application metrics.  
-     - Grafana to visualize metrics and logs.  
-     - Loki and Promtail to aggregate and forward logs.  
-   - Ensure all monitoring and logging services are running correctly and accessible via their respective URLs.  
+5. **Cloud Deployment**:  
+   - Deploy the application stack to a cloud platform (AWS, GCP, or Azure) using Docker Compose.
+   - Set up a domain for your application (e.g., `your-app.domain.com`).
+   - If you don’t have a domain, obtain a free subdomain from [Afraid DNS](https://freedns.afraid.org/).
+   - Configure:
+     - HTTP to redirect to HTTPS.
+     - `www` to redirect to the non-`www` domain.
 
-7. **Cloud Deployment**:  
-   - Deploy the fully containerized application stack to an AWS EC2 instance (or any other cloud platform of your choice).  
-   - Set up a domain for your application.  
-   - If you do not have a domain, obtain a free subdomain from [Afraid DNS](https://freedns.afraid.org/).  
-   - Configure:  
-     - HTTP to redirect to HTTPS.  
-     - `www` to redirect to the non-`www` version of your domain.  
-
-8. **Article**:
-   - Write and publish a detailed **Article** about the project. Your article should include:  
-     - An overview of the project and its purpose.  
-     - Step-by-step instructions on how you containerized, orchestrated, and deployed the application.  
-     - Screenshots of your setup, including:  
-       - The deployed application.  
-       - Grafana dashboards showing metrics and logs.  
-       - Reverse proxy configuration.  
-     - Challenges you faced and how you resolved them.  
-     - Lessons learned and tips for others.  
-   - Include the link to your article in your submission.
-
+6. **Article**:  
+   - Write and publish a detailed **Article** about the project. Your article should include:
+     - An overview of the project and its purpose.
+     - Step-by-step instructions on how you containerized, orchestrated, and deployed the application.
+     - Screenshots of your setup, including:
+       - The deployed application.
+       - Grafana dashboards showing metrics and logs.
+       - Reverse proxy configuration.
+     - Challenges you faced and how you resolved them.
+     - Lessons learned and tips for others.
+   - Include the link to your Medium article in your submission.
 ---
-
 ## Project Structure
 
 The repository is organized as follows:
@@ -117,7 +131,9 @@ Your hosted application will be evaluated based on the following criteria:
    - Ensure PostgreSQL is properly configured and Adminer is accessible via `db.domain`.  
 
 4. **Monitoring and Logging**:  
-   - Test Prometheus, Grafana, Loki, and Promtail to ensure metrics and logs are being captured and displayed.  
+   - Test that Prometheus scrapes application metrics and Grafana displays metrics and logs.
+   - Ensure that cAdvisor metrics are displayed properly in the Grafana dashboard.
+   - Ensure that Logs from Loki Can be visualized in Grafana.
 
 5. **Cloud Deployment**:  
    - Confirm the application is deployed to the cloud and accessible via a public URL.  
@@ -147,4 +163,9 @@ Your hosted application will be evaluated based on the following criteria:
 
 ---
 
-Good luck with your DevOps November CV Challenge! This is your opportunity to showcase your end-to-end DevOps skills and stand out to potential employers.
+**EXPO**
+- To ensure that the services in the Monitoring Stack (e.g., Prometheus, Grafana, cAdvisor, and Loki) are properly routed by the reverse proxy in the Application Stack, both docker-compose.yml files should share the same Docker network. This will enable the reverse proxy in the Application Stack to route traffic to the appropriate services in the Monitoring Stack, despite them being in separate Docker Compose files.
+Additionally, having both stacks on the same Docker network allows cAdvisor to collect container metrics and Promtail to gather logs from the containers in the Application Stack. 
+
+
+Good luck with this Challenge! This is your opportunity to showcase your end-to-end DevOps skills and stand out to potential employers.
