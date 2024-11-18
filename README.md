@@ -159,8 +159,6 @@ Your hosted application will be evaluated based on the following criteria:
      - Metrics and logs displayed in Grafana.  
      - Reverse proxy routes and configurations.  
 
-3.  Use the provided [https://docs.google.com/forms/d/e/1FAIpQLSfmbaAkD2GyJCEhyE0zzKtuQkzmRaFG1xwm3AwbT2DPLuuJgg/viewform?usp=sf_linkm](#) to share your work.
-
 ---
 
 **EXPO**
