@@ -63,7 +63,7 @@ As part of this challenge, your primary goal is to:
      - HTTP to redirect to HTTPS.  
      - `www` to redirect to the non-`www` version of your domain.  
 
-8. ** Article**:
+8. **Article**:
    - Write and publish a detailed **Article** about the project. Your article should include:  
      - An overview of the project and its purpose.  
      - Step-by-step instructions on how you containerized, orchestrated, and deployed the application.  
