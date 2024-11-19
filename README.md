@@ -157,9 +157,5 @@ Your hosted application will be evaluated based on the following criteria:
 
 ---
 
-**EXPO**
-- To ensure that the services in the Monitoring Stack (e.g., Prometheus, Grafana, cAdvisor, and Loki) are properly routed by the reverse proxy in the Application Stack, both docker-compose.yml files should share the same Docker network. This will enable the reverse proxy in the Application Stack to route traffic to the appropriate services in the Monitoring Stack, despite them being in separate Docker Compose files.
-Additionally, having both stacks on the same Docker network allows cAdvisor to collect container metrics and Promtail to gather logs from the containers in the Application Stack. 
-
 
 Good luck with this Challenge! This is your opportunity to showcase your end-to-end DevOps skills and stand out to potential employers.
