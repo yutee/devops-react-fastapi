@@ -51,7 +51,7 @@ services:
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
     environment:
-      - VITE_API_URL=http://localhost/api
+      - VITE_API_URL=http://${DOMAIN}/api
     networks:
       - app-network
     depends_on:
@@ -105,7 +105,7 @@ services:
     image: adminer
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.adminer.rule=Host(`db.localhost`)"
+      - "traefik.http.routers.adminer.rule=Host(`db.${DOMAIN}`)"
       - "traefik.http.services.adminer.loadbalancer.server.port=8080"
     networks:
       - app-network

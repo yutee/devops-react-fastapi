@@ -14,6 +14,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    ports:
+      - "9090:9090"
     networks:
       - app-network
 
@@ -24,12 +26,14 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       # Add these Grafana configurations - omorrr this traefik routing sha
-      - GF_SERVER_ROOT_URL=http://localhost/grafana
+      - GF_SERVER_ROOT_URL=http://${DOMAIN}/grafana
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    ports:
+      - "3000:3000"
     networks:
       - app-network
 
@@ -42,7 +46,7 @@ services:
       - ./data:/tmp
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.loki.rule=PathPrefix(`/loki`)"
+      - "traefik.http.routers.loki.rule=Host(`loki.${DOMAIN}`)"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
     ports:
       - "3100:3100"
@@ -78,10 +82,12 @@ services:
       - --store_container_labels=true
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cadvisor.rule=PathPrefix(`/cadvisor`)"
+      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.${DOMAIN}`)"
       - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.cadvisor-strip.stripprefix.prefixes=/cadvisor"
-      - "traefik.http.routers.cadvisor.middlewares=cadvisor-strip"
+    ports:
+      - "8085:8080"
+    env_file:
+      - .env
     networks:
       - app-network
 
