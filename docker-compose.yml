@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+
+  prometheus:
+    extends:
+      file: ./monitoring/docker-compose.yml
+      service: prometheus
+
+  grafana:
+    extends:
+      file: ./monitoring/docker-compose.yml
+      service: grafana
+
+  loki:
+    extends:
+      file: ./monitoring/docker-compose.yml
+      service: loki
+
+  promtail:
+    extends:
+      file: ./monitoring/docker-compose.yml
+      service: promtail
+
+  cadvisor:
+    extends:
+      file: ./monitoring/docker-compose.yml
+      service: cadvisor
+
+  reverse-proxy:
+    image: traefik:v3.0
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+    environment:
+      - VITE_API_URL=http://localhost/api
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"  # Changed to more standard /api prefix
+      - "traefik.http.middlewares.backend-strip-prefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend.middlewares=backend-strip-prefix"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydb
+      - POSTGRES_HOST=database
+      - POSTGRES_PORT=5432
+      # Both formats of database URL for flexibility
+      - DATABASE_URL=postgresql://user:password@database:5432/mydb
+      - SQLALCHEMY_DATABASE_URL=postgresql://user:password@database:5432/mydb
+    networks:
+      - app-network
+    depends_on:
+      database:
+        condition: service_healthy  # Wait for database to be really ready
+
+  database:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "5432:5432"  # Exposed for local development
+
+  adminer:
+    image: adminer
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.rule=Host(`db.localhost`)"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+    networks:
+      - app-network
+    depends_on:
+      - database
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  database_data:
