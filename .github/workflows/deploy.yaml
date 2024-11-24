@@ -39,8 +39,10 @@ jobs:
           docker-compose down -v
 
           echo "Setting permissions for Loki data directory..."
-          mkdir -p ./loki-data
-          chmod 777 ./loki-data
+          sudo mkdir -p monitoring/data/loki/chunks monitoring/data/loki/rules
+          sudo chown -R 10001:10001 monitoring/data
+          sudo chmod -R 755 monitoring/data
+
           
           echo "Creating acme.json..."
           touch acme.json
