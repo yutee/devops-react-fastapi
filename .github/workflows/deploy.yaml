@@ -37,6 +37,10 @@ jobs:
 
           echo "Bringing down the current Docker Compose app..."
           docker-compose down -v
+
+          echo "Setting permissions for Loki data directory..."
+          mkdir -p ./loki-data
+          chmod 777 ./loki-data
           
           echo "Creating acme.json..."
           touch acme.json

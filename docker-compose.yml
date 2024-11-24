@@ -57,8 +57,8 @@ services:
       - "9000:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/azureuser/app/traefik.yml:/etc/traefik/traefik.yml
-      - /home/azureuser/app/acme.json:/acme.json
+      - /home/azureuser/devops-react-fastapi/traefik.yml:/etc/traefik/traefik.yml
+      - /home/azureuser/devops-react-fastapi/acme.json:/acme.json
     networks:
       - app-network
         
@@ -131,7 +131,7 @@ services:
     image: adminer
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.adminer.rule=Host(`loki.${DOMAIN}`)"
+      - "traefik.http.routers.adminer.rule=Host(`db.${DOMAIN}`)"
       - "traefik.http.routers.adminer.entrypoints=websecure"
       - "traefik.http.routers.adminer.tls=true"
       - "traefik.http.routers.adminer.tls.certresolver=myresolver"
