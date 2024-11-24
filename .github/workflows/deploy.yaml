@@ -1,0 +1,51 @@
+name: Deploy to Azure VM
+
+on:
+  workflow_dispatch:  
+  push:
+    paths-ignore:
+      - README.md
+      - instructions.md
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy application to Azure VM
+      env:
+        HOST: 172.177.107.24
+        USER: azureuser
+        REPO_URL: https://github.com/yutee/devops-react-fastapi.git
+        REPO_DIR: devops-react-fastapi
+      run: |
+        ssh -o StrictHostKeyChecking=no $USER@$HOST << EOF
+          echo "Cloning the GitHub repository..."
+          # rm -rf $REPO_DIR
+          git clone $REPO_URL
+
+          # echo "Navigating into the repository folder..."
+          # cd $REPO_DIR
+
+          # echo "Bringing down the current Docker Compose app..."
+          # docker compose down -v
+          
+          # echo "Recreating acme.json..."
+          # rm -f acme.json
+          # touch acme.json
+          # chmod 600 acme.json
+
+          # echo "Spinning up Docker Compose environment..."
+          # docker compose up -d
+
+          # echo "Testing if the app is running..."
+          # curl -f http://localhost || { echo "App is not running"; exit 1; }
+        EOF
