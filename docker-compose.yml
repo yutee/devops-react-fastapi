@@ -30,18 +30,38 @@ services:
   reverse-proxy:
     image: traefik:v3.0
     command:
+      - "--log.level=DEBUG"
+      - "--api.dashboard=true"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.dashboard.address=:9000"
+      - "--configFile=/etc/traefik/traefik.yml"
+    labels:
+      - "traefik.enable=true"
+      # Dashboard configuration
+      - "traefik.http.routers.dashboard.rule=PathPrefix(`/dashboard`) || PathPrefix(`/api`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=dashboard"
+      # Global redirect HTTP to HTTPS
+      - "traefik.http.middlewares.httpsredirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.httpsredirect.redirectscheme.permanent=true"
+      - "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.redirs.entrypoints=web"
+      - "traefik.http.routers.redirs.middlewares=httpsredirect"
     ports:
       - "80:80"
-      - "8080:8080"
+      - "443:443"
+      - "9000:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /home/azureuser/app/traefik.yml:/etc/traefik/traefik.yml
+      - /home/azureuser/app/acme.json:/acme.json
     networks:
       - app-network
-
+        
   frontend:
     build:
       context: ./frontend
@@ -49,9 +69,12 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
     environment:
-      - VITE_API_URL=http://${DOMAIN}/api
+      - VITE_API_URL=https://${DOMAIN}/api
     networks:
       - app-network
     depends_on:
@@ -65,6 +88,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"  # Changed to more standard /api prefix
       - "traefik.http.middlewares.backend-strip-prefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"  
       - "traefik.http.routers.backend.middlewares=backend-strip-prefix"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
     environment:
@@ -106,12 +132,15 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.adminer.rule=Host(`db.${DOMAIN}`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls=true"
+      - "traefik.http.routers.adminer.tls.certresolver=myresolver"
       - "traefik.http.services.adminer.loadbalancer.server.port=8080"
     networks:
       - app-network
     depends_on:
       - database
-
+        
 networks:
   app-network:
     driver: bridge

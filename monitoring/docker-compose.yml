@@ -14,6 +14,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.tls.certresolver=myresolver"
     ports:
       - "9090:9090"
     networks:
@@ -25,13 +28,15 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      # Add these Grafana configurations - omorrr this traefik routing sha
-      - GF_SERVER_ROOT_URL=http://${DOMAIN}/grafana
+      - GF_SERVER_ROOT_URL=https://${DOMAIN}/grafana
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.tls.certresolver=myresolver"
     ports:
       - "3000:3000"
     networks:
@@ -43,10 +48,13 @@ services:
     command: -config.file=/mnt/config/loki-config.yaml
     volumes:
       - ./loki-config.yaml:/mnt/config/loki-config.yaml
-      - ./data:/tmp
+      - ./data:/mnt/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.loki.rule=Host(`loki.${DOMAIN}`)"
+      - "traefik.http.routers.loki.entrypoints=websecure"
+      - "traefik.http.routers.loki.tls=true"
+      - "traefik.http.routers.loki.tls.certresolver=myresolver"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
     ports:
       - "3100:3100"
@@ -60,8 +68,6 @@ services:
     volumes:
       - ./promtail-config.yaml:/mnt/config/promtail-config.yaml
       - /var/log:/var/log
-    depends_on:
-      - loki
     networks:
       - app-network
 
@@ -83,6 +89,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.${DOMAIN}`)"
+      - "traefik.http.routers.cadvisor.entrypoints=websecure"
+      - "traefik.http.routers.cadvisor.tls=true"
+      - "traefik.http.routers.cadvisor.tls.certresolver=myresolver"
       - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
     ports:
       - "8085:8080"
