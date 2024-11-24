@@ -29,22 +29,21 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no $USER@$HOST << EOF
           echo "Cloning the GitHub repository..."
-          # rm -rf $REPO_DIR
+          rm -rf $REPO_DIR
           git clone $REPO_URL
 
-          # echo "Navigating into the repository folder..."
-          # cd $REPO_DIR
+          echo "Navigating into the repository folder..."
+          cd $REPO_DIR
 
-          # echo "Bringing down the current Docker Compose app..."
-          # docker compose down -v
+          echo "Bringing down the current Docker Compose app..."
+          docker compose down -v
           
-          # echo "Recreating acme.json..."
-          # rm -f acme.json
-          # touch acme.json
-          # chmod 600 acme.json
+          echo "Creating acme.json..."
+          touch acme.json
+          chmod 600 acme.json
 
-          # echo "Spinning up Docker Compose environment..."
-          # docker compose up -d
+          echo "Spinning up Docker Compose environment..."
+          docker compose up -d --build
 
           # echo "Testing if the app is running..."
           # curl -f http://localhost || { echo "App is not running"; exit 1; }
