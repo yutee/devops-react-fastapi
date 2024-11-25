@@ -8,8 +8,9 @@ entryPoints:
           scheme: https
   websecure:
     address: ":443"
-  dashboard:
-    address: ":9000"
+    http:
+      tls:
+        certResolver: myresolver
 
 api:
   dashboard: true

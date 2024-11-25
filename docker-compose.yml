@@ -32,19 +32,20 @@ services:
     command:
       - "--log.level=DEBUG"
       - "--api.dashboard=true"
-      - "--api.insecure=true"
+      - "--api.insecure=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.dashboard.address=:9000"
       - "--configFile=/etc/traefik/traefik.yml"
     labels:
       - "traefik.enable=true"
       # Dashboard configuration
-      - "traefik.http.routers.dashboard.rule=Host(`${DOMAIN}`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
       # Global redirect HTTP to HTTPS
       - "traefik.http.middlewares.httpsredirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.httpsredirect.redirectscheme.permanent=true"
@@ -69,6 +70,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.frontend.priority=1"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
@@ -86,7 +88,8 @@ services:
       dockerfile: Dockerfile
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"  # Changed to more standard /api prefix
+      - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.priority=2"
       - "traefik.http.middlewares.backend-strip-prefix.stripprefix.prefixes=/api"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"

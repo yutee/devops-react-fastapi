@@ -12,7 +12,8 @@ services:
       - "--web.route-prefix=/prometheus"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)"
+      - "traefik.http.routers.prometheus.rule=Host(`${DOMAIN}`) && PathPrefix(`/prometheus`)"
+      - "traefik.http.routers.prometheus.priority=2"
       - "traefik.http.middlewares.prometheus-strip.stripprefix.prefixes=/prometheus"
       - "traefik.http.routers.prometheus.middlewares=prometheus-strip@docker"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
@@ -34,7 +35,8 @@ services:
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)"
+      - "traefik.http.routers.grafana.rule=Host(`${DOMAIN}`) && PathPrefix(`/grafana`)"
+      - "traefik.http.routers.grafana.priority=2"
       - "traefik.http.middlewares.grafana-strip.stripprefix.prefixes=/grafana"
       - "traefik.http.routers.grafana.middlewares=grafana-strip@docker"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
