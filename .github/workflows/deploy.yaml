@@ -27,30 +27,50 @@ jobs:
         REPO_URL: https://github.com/yutee/devops-react-fastapi.git
         REPO_DIR: devops-react-fastapi
       run: |
-        ssh -o StrictHostKeyChecking=no $USER@$HOST << EOF
-          echo "Cloning the GitHub repository..."
-          rm -rf $REPO_DIR
-          git clone $REPO_URL
+        ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+          echo "Stopping and removing existing containers..."
+          if [ -d "$REPO_DIR" ]; then
+            cd $REPO_DIR
+            docker-compose down -v || true
+            cd ..
+          fi
 
-          echo "Navigating into the repository folder..."
+          echo "Cleaning up Loki data with proper permissions..."
+          sudo rm -rf $REPO_DIR/monitoring/data || true
+
+          echo "Removing old repository..."
+          sudo rm -rf $REPO_DIR
+
+          echo "Cloning the GitHub repository..."
+          git clone $REPO_URL
           cd $REPO_DIR
 
-          echo "Bringing down the current Docker Compose app..."
-          docker-compose down -v
-
-          echo "Setting permissions for Loki data directory..."
-          sudo mkdir -p monitoring/data/loki/chunks monitoring/data/loki/rules
+          echo "Setting up monitoring directory structure..."
+          sudo mkdir -p monitoring/data/loki/{chunks,rules,wal,index}
           sudo chown -R 10001:10001 monitoring/data
           sudo chmod -R 777 monitoring/data
 
-          
           echo "Creating acme.json..."
           touch acme.json
           chmod 600 acme.json
 
+          echo "Pulling latest Docker images..."
+          docker-compose pull
+
           echo "Spinning up Docker Compose environment..."
           docker-compose up -d --build
 
-          # echo "Testing if the app is running..."
-          # curl -f http://localhost || { echo "App is not running"; exit 1; }
+          echo "Waiting for services to start..."
+          sleep 30
+
+          echo "Checking container status..."
+          docker-compose ps
+          
+          # Check if all containers are running
+          if [ $(docker-compose ps -q | wc -l) -gt 0 ]; then
+            echo "Deployment successful!"
+          else
+            echo "Deployment failed - some containers are not running"
+            exit 1
+          fi
         EOF
