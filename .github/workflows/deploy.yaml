@@ -41,7 +41,7 @@ jobs:
           echo "Setting permissions for Loki data directory..."
           sudo mkdir -p monitoring/data/loki/chunks monitoring/data/loki/rules
           sudo chown -R 10001:10001 monitoring/data
-          sudo chmod -R 755 monitoring/data
+          sudo chmod -R 777 monitoring/data
 
           
           echo "Creating acme.json..."
