@@ -8,8 +8,8 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
-      # - "--web.external-url=/prometheus"
-      # - "--web.route-prefix=/prometheus"
+      - "--web.external-url=/prometheus"
+      - "--web.route-prefix=/prometheus"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN}`) || (Host(`${DOMAIN}`) && PathPrefix(`/prometheus`))"
@@ -31,8 +31,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      # - GF_SERVER_ROOT_URL=https://${DOMAIN}/grafana
-      # - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SERVER_ROOT_URL=https://${DOMAIN}/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN}`) || (Host(`${DOMAIN}`) && PathPrefix(`/grafana`))"
