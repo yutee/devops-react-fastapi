@@ -29,8 +29,8 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no $USER@$HOST << EOF
           echo "Cloning the GitHub repository..."
-          sudo chmod -R 777 monitoring/data
-          rm -rf $REPO_DIR
+          sudo chmod -R 777 $REPO_DIR/monitoring/data
+          sudo rm -rf $REPO_DIR
           git clone $REPO_URL
 
           echo "Navigating into the repository folder..."
