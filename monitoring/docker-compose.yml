@@ -13,13 +13,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`${DOMAIN}`) && PathPrefix(`/prometheus`)"
-      - "traefik.http.routers.prometheus.priority=2"
       - "traefik.http.middlewares.prometheus-strip.stripprefix.prefixes=/prometheus"
-      - "traefik.http.routers.prometheus.middlewares=prometheus-strip@docker"
+      - "traefik.http.routers.prometheus.middlewares=prometheus-strip"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
       - "traefik.http.routers.prometheus.entrypoints=websecure"
       - "traefik.http.routers.prometheus.tls=true"
       - "traefik.http.routers.prometheus.tls.certresolver=myresolver"
+      - "traefik.http.routers.prometheus.priority=10"  # Ensure higher priority
     ports:
       - "9090:9090"
     networks:
@@ -36,13 +36,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`${DOMAIN}`) && PathPrefix(`/grafana`)"
-      - "traefik.http.routers.grafana.priority=2"
       - "traefik.http.middlewares.grafana-strip.stripprefix.prefixes=/grafana"
-      - "traefik.http.routers.grafana.middlewares=grafana-strip@docker"
+      - "traefik.http.routers.grafana.middlewares=grafana-strip"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.tls.certresolver=myresolver"
+      - "traefik.http.routers.grafana.priority=10"  # Ensure higher priority
     ports:
       - "3000:3000"
     networks:
