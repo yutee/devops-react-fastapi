@@ -50,7 +50,7 @@ jobs:
           chmod 600 acme.json
 
           echo "Spinning up Docker Compose environment..."
-          docker-compose up -d --build
+          docker-compose up -d
 
           # echo "Testing if the app is running..."
           # curl -f http://localhost || { echo "App is not running"; exit 1; }
