@@ -13,7 +13,7 @@ entryPoints:
 
 api:
   dashboard: true
-  insecure: true
+  insecure: false
 
 certificatesResolvers:
   myresolver:
