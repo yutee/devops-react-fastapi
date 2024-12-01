@@ -1,4 +1,4 @@
-# StackWatch - A DevOps project deploying React.js and FastAPI application with integrated robust monitoring using Docker Compose.
+# Automating Full-Stack App Deployments: Application and Monitoring Setup Using Docker Compose.
 
 ---
 
